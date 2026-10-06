@@ -1,4 +1,40 @@
 // List of products shown on the kiosk.
+
+const SUPABASE_URL = "https://ynjbvwcszuftpgfxraqs.supabase.co";
+
+const SUPABASE_KEY = "sb_publishable_h1BOGoCKbnFsbVX5mC3uPA_hfZYgkTB";
+
+let db = null;
+
+if (window.supabase) {
+    db = window.supabase.createClient(
+        SUPABASE_URL,
+        SUPABASE_KEY
+    );
+}
+
+async function testDatabaseConnection() {
+    if (!db) {
+        console.log("Supabase library is not loaded yet.");
+        return;
+    }
+
+    const { data, error } = await db
+        .from("products")
+        .select("*");
+
+    if (error) {
+        console.error("Database connection failed:", error);
+        return;
+    }
+
+    console.log("Supabase connected successfully!");
+    console.log(data);
+}
+
+testDatabaseConnection();
+
+
 const products = [
     { id: 1, name: "Coffee", price: 45, icon: "&#9749;" },
     { id: 2, name: "Sandwich", price: 50, icon: "&#129386;" },
