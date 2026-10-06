@@ -369,9 +369,9 @@ button {
 
 .error-message {
     min-height: 28px;
-    margin: 10px 0;
+    margin: 10px 0 0;
     color: #b91c1c;
-    font-size: 17px;
+    font-size: 18px;
     font-weight: 800;
 }
 
