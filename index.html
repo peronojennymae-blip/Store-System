@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campus Kiosk POS</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <main class="kiosk">
+        <section class="pos-screen">
+            <header class="top-bar">
+                <div>
+                    <p class="eyebrow">Self-Service POS</p>
+                    <h1>Choose Your Items</h1>
+                </div>
+            </header>
+
+            <div class="pos-layout">
+                <section class="products-panel" aria-label="Product selection">
+                    <h2>Products</h2>
+                    <div id="productGrid" class="product-grid"></div>
+                </section>
+
+                <aside class="cart-panel" aria-label="Cart">
+                    <div class="cart-header">
+                        <h2>Your Cart</h2>
+                        <span id="cartCount" class="cart-count">0 items</span>
+                    </div>
+
+                    <div id="cartItems" class="cart-items">
+                        <p class="empty-cart">Tap a product to add it here.</p>
+                    </div>
+
+                    <div class="cart-total">
+                        <span>Total</span>
+                        <strong id="transactionTotal">&#8369;0.00</strong>
+                    </div>
+
+                    <button id="summaryButton" class="summary-button">Proceed to Order Summary</button>
+                </aside>
+            </div>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
