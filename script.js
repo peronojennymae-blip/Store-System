@@ -62,6 +62,17 @@ const receiptAmountPaid = document.getElementById("receiptAmountPaid");
 const receiptChange = document.getElementById("receiptChange");
 const newTransactionButton = document.getElementById("newTransactionButton");
 
+const screens = [
+    itemSelectionScreen,
+    orderSummaryScreen,
+    paymentScreen,
+    cashScreen,
+    qrScreen,
+    cardScreen,
+    successScreen,
+    receiptScreen
+];
+
 function formatPeso(amount) {
     return "\u20B1" + amount.toFixed(2);
 }
@@ -78,17 +89,16 @@ function calculateTotal() {
 
 // Shows one screen and hides the other screens.
 function showScreen(screenToShow) {
-    itemSelectionScreen.classList.add("hidden");
-    orderSummaryScreen.classList.add("hidden");
-    paymentScreen.classList.add("hidden");
-    cashScreen.classList.add("hidden");
-    qrScreen.classList.add("hidden");
-    cardScreen.classList.add("hidden");
-    successScreen.classList.add("hidden");
-    receiptScreen.classList.add("hidden");
+    screens.forEach(function(screen) {
+        screen.classList.add("hidden");
+    });
 
     screenToShow.classList.remove("hidden");
     window.scrollTo(0, 0);
+}
+
+function displayTotal(element, amount) {
+    element.textContent = formatPeso(amount);
 }
 
 // Creates the large product buttons from the products array.
@@ -216,7 +226,7 @@ function updateTotals() {
     });
 
     cartCount.textContent = totalQuantity === 1 ? "1 item" : totalQuantity + " items";
-    transactionTotal.textContent = formatPeso(calculateTotal());
+    displayTotal(transactionTotal, calculateTotal());
 }
 
 // Builds the order summary from the current cart.
@@ -241,7 +251,7 @@ function displayOrderSummary() {
         summaryItems.appendChild(summaryItem);
     });
 
-    summaryTotal.textContent = formatPeso(calculateTotal());
+    displayTotal(summaryTotal, calculateTotal());
 }
 
 function goToOrderSummary() {
@@ -262,7 +272,7 @@ function goToPayment() {
         return;
     }
 
-    paymentTotal.textContent = formatPeso(calculateTotal());
+    displayTotal(paymentTotal, calculateTotal());
     showScreen(paymentScreen);
 }
 
@@ -281,6 +291,17 @@ function formatReceiptDate(dateValue) {
     });
 }
 
+function createTransactionItems() {
+    return cart.map(function(item) {
+        return {
+            name: item.name,
+            price: item.price,
+            quantity: item.quantity,
+            subtotal: item.price * item.quantity
+        };
+    });
+}
+
 // Shows the final success screen after any valid payment.
 function showPaymentSuccess(paymentMethod, amountPaid, changeAmount) {
     const total = calculateTotal();
@@ -289,24 +310,17 @@ function showPaymentSuccess(paymentMethod, amountPaid, changeAmount) {
     completedTransaction = {
         referenceNumber: referenceNumber,
         date: new Date(),
-        items: cart.map(function(item) {
-            return {
-                name: item.name,
-                price: item.price,
-                quantity: item.quantity,
-                subtotal: item.price * item.quantity
-            };
-        }),
+        items: createTransactionItems(),
         total: total,
         paymentMethod: paymentMethod,
         amountPaid: amountPaid,
         change: changeAmount
     };
 
-    successTotal.textContent = formatPeso(total);
-    successAmountPaid.textContent = formatPeso(amountPaid);
+    displayTotal(successTotal, total);
+    displayTotal(successAmountPaid, amountPaid);
     successMethod.textContent = paymentMethod;
-    successChange.textContent = formatPeso(changeAmount);
+    displayTotal(successChange, changeAmount);
     successReference.textContent = referenceNumber;
 
     showScreen(successScreen);
@@ -320,9 +334,9 @@ function displayReceipt() {
     receiptReference.textContent = completedTransaction.referenceNumber;
     receiptDate.textContent = formatReceiptDate(completedTransaction.date);
     receiptMethod.textContent = completedTransaction.paymentMethod;
-    receiptTotal.textContent = formatPeso(completedTransaction.total);
-    receiptAmountPaid.textContent = formatPeso(completedTransaction.amountPaid);
-    receiptChange.textContent = formatPeso(completedTransaction.change);
+    displayTotal(receiptTotal, completedTransaction.total);
+    displayTotal(receiptAmountPaid, completedTransaction.amountPaid);
+    displayTotal(receiptChange, completedTransaction.change);
     receiptItems.innerHTML = "";
 
     completedTransaction.items.forEach(function(item) {
@@ -352,15 +366,15 @@ function startNewTransaction() {
     processCardPaymentButton.disabled = false;
     receiptItems.innerHTML = "";
 
-    paymentTotal.textContent = formatPeso(0);
-    cashTotal.textContent = formatPeso(0);
-    qrTotal.textContent = formatPeso(0);
-    cardTotal.textContent = formatPeso(0);
-    summaryTotal.textContent = formatPeso(0);
-    successTotal.textContent = formatPeso(0);
-    successAmountPaid.textContent = formatPeso(0);
+    displayTotal(paymentTotal, 0);
+    displayTotal(cashTotal, 0);
+    displayTotal(qrTotal, 0);
+    displayTotal(cardTotal, 0);
+    displayTotal(summaryTotal, 0);
+    displayTotal(successTotal, 0);
+    displayTotal(successAmountPaid, 0);
     successMethod.textContent = "";
-    successChange.textContent = formatPeso(0);
+    displayTotal(successChange, 0);
     successReference.textContent = "";
 
     displayCart();
@@ -368,7 +382,7 @@ function startNewTransaction() {
 }
 
 function goToCashPayment() {
-    cashTotal.textContent = formatPeso(calculateTotal());
+    displayTotal(cashTotal, calculateTotal());
     amountPaidInput.value = "";
     cashError.textContent = "";
     showScreen(cashScreen);
@@ -397,7 +411,7 @@ function processCashPayment() {
 }
 
 function goToQrPayment() {
-    qrTotal.textContent = formatPeso(calculateTotal());
+    displayTotal(qrTotal, calculateTotal());
     showScreen(qrScreen);
 }
 
@@ -407,7 +421,7 @@ function processQrPayment() {
 }
 
 function goToCardPayment() {
-    cardTotal.textContent = formatPeso(calculateTotal());
+    displayTotal(cardTotal, calculateTotal());
     cardProcessingMessage.textContent = "";
     processCardPaymentButton.disabled = false;
     showScreen(cardScreen);
