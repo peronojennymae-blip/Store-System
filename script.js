@@ -15,6 +15,7 @@ const productGrid = document.getElementById("productGrid");
 const cartItems = document.getElementById("cartItems");
 const cartCount = document.getElementById("cartCount");
 const transactionTotal = document.getElementById("transactionTotal");
+const cartError = document.getElementById("cartError");
 const summaryButton = document.getElementById("summaryButton");
 const itemSelectionScreen = document.getElementById("itemSelectionScreen");
 const orderSummaryScreen = document.getElementById("orderSummaryScreen");
@@ -121,6 +122,7 @@ function addToCart(productId) {
         });
     }
 
+    cartError.textContent = "";
     displayCart();
 }
 
@@ -232,11 +234,23 @@ function displayOrderSummary() {
 }
 
 function goToOrderSummary() {
+    if (cart.length === 0) {
+        cartError.textContent = "Please add at least one item before proceeding.";
+        return;
+    }
+
+    cartError.textContent = "";
     displayOrderSummary();
     showScreen(orderSummaryScreen);
 }
 
 function goToPayment() {
+    if (cart.length === 0) {
+        showScreen(itemSelectionScreen);
+        cartError.textContent = "Please add at least one item before payment.";
+        return;
+    }
+
     paymentTotal.textContent = formatPeso(calculateTotal());
     showScreen(paymentScreen);
 }
