@@ -8,7 +8,7 @@
 </head>
 <body>
     <main class="kiosk">
-        <section class="pos-screen">
+        <section id="itemSelectionScreen" class="screen pos-screen">
             <header class="top-bar">
                 <div>
                     <p class="eyebrow">Self-Service POS</p>
@@ -39,6 +39,62 @@
 
                     <button id="summaryButton" class="summary-button">Proceed to Order Summary</button>
                 </aside>
+            </div>
+        </section>
+
+        <section id="orderSummaryScreen" class="screen summary-screen hidden">
+            <header class="top-bar">
+                <div>
+                    <p class="eyebrow">Order Summary</p>
+                    <h1>Review Your Order</h1>
+                </div>
+            </header>
+
+            <div class="summary-panel">
+                <div id="summaryItems" class="summary-items"></div>
+
+                <div class="summary-total">
+                    <span>Total Amount</span>
+                    <strong id="summaryTotal">&#8369;0.00</strong>
+                </div>
+
+                <div class="summary-actions">
+                    <button id="backToItemsButton" class="back-button">Back</button>
+                    <button id="continuePaymentButton" class="summary-button">Continue to Payment</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="paymentScreen" class="screen payment-screen hidden">
+            <header class="top-bar">
+                <div>
+                    <p class="eyebrow">Payment Method</p>
+                    <h1>Select Payment</h1>
+                </div>
+            </header>
+
+            <div class="payment-panel">
+                <div class="payment-total">
+                    <span>Total Amount</span>
+                    <strong id="paymentTotal">&#8369;0.00</strong>
+                </div>
+
+                <div class="payment-methods">
+                    <button class="payment-button cash-button" type="button">
+                        <span class="payment-icon">&#128181;</span>
+                        Cash
+                    </button>
+                    <button class="payment-button qr-button" type="button">
+                        <span class="payment-icon">&#9638;</span>
+                        QR Payment
+                    </button>
+                    <button class="payment-button card-button" type="button">
+                        <span class="payment-icon">&#128179;</span>
+                        Credit/Debit Card
+                    </button>
+                </div>
+
+                <button id="backToSummaryButton" class="back-button">Back</button>
             </div>
         </section>
     </main>

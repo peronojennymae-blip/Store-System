@@ -16,9 +16,38 @@ const cartItems = document.getElementById("cartItems");
 const cartCount = document.getElementById("cartCount");
 const transactionTotal = document.getElementById("transactionTotal");
 const summaryButton = document.getElementById("summaryButton");
+const itemSelectionScreen = document.getElementById("itemSelectionScreen");
+const orderSummaryScreen = document.getElementById("orderSummaryScreen");
+const paymentScreen = document.getElementById("paymentScreen");
+const summaryItems = document.getElementById("summaryItems");
+const summaryTotal = document.getElementById("summaryTotal");
+const paymentTotal = document.getElementById("paymentTotal");
+const backToItemsButton = document.getElementById("backToItemsButton");
+const continuePaymentButton = document.getElementById("continuePaymentButton");
+const backToSummaryButton = document.getElementById("backToSummaryButton");
 
 function formatPeso(amount) {
     return "\u20B1" + amount.toFixed(2);
+}
+
+function calculateTotal() {
+    let totalPrice = 0;
+
+    cart.forEach(function(item) {
+        totalPrice += item.price * item.quantity;
+    });
+
+    return totalPrice;
+}
+
+// Shows one screen and hides the other screens.
+function showScreen(screenToShow) {
+    itemSelectionScreen.classList.add("hidden");
+    orderSummaryScreen.classList.add("hidden");
+    paymentScreen.classList.add("hidden");
+
+    screenToShow.classList.remove("hidden");
+    window.scrollTo(0, 0);
 }
 
 // Creates the large product buttons from the products array.
@@ -139,19 +168,58 @@ function displayCart() {
 
 function updateTotals() {
     let totalQuantity = 0;
-    let totalPrice = 0;
 
     cart.forEach(function(item) {
         totalQuantity += item.quantity;
-        totalPrice += item.price * item.quantity;
     });
 
     cartCount.textContent = totalQuantity === 1 ? "1 item" : totalQuantity + " items";
-    transactionTotal.textContent = formatPeso(totalPrice);
+    transactionTotal.textContent = formatPeso(calculateTotal());
 }
 
-summaryButton.addEventListener("click", function() {
-    alert("Order summary screen is not implemented yet.");
+// Builds the order summary from the current cart.
+function displayOrderSummary() {
+    summaryItems.innerHTML = "";
+
+    if (cart.length === 0) {
+        summaryItems.innerHTML = '<p class="empty-cart">Your cart is empty.</p>';
+    }
+
+    cart.forEach(function(item) {
+        const subtotal = item.price * item.quantity;
+        const summaryItem = document.createElement("div");
+        summaryItem.className = "summary-item";
+        summaryItem.innerHTML = `
+            <span class="summary-name">${item.name}</span>
+            <span>${formatPeso(item.price)}</span>
+            <span>Qty: ${item.quantity}</span>
+            <strong>${formatPeso(subtotal)}</strong>
+        `;
+
+        summaryItems.appendChild(summaryItem);
+    });
+
+    summaryTotal.textContent = formatPeso(calculateTotal());
+}
+
+function goToOrderSummary() {
+    displayOrderSummary();
+    showScreen(orderSummaryScreen);
+}
+
+function goToPayment() {
+    paymentTotal.textContent = formatPeso(calculateTotal());
+    showScreen(paymentScreen);
+}
+
+summaryButton.addEventListener("click", goToOrderSummary);
+backToItemsButton.addEventListener("click", function() {
+    showScreen(itemSelectionScreen);
+});
+continuePaymentButton.addEventListener("click", goToPayment);
+backToSummaryButton.addEventListener("click", function() {
+    displayOrderSummary();
+    showScreen(orderSummaryScreen);
 });
 
 displayProducts();
