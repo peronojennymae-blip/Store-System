@@ -25,6 +25,31 @@ const paymentTotal = document.getElementById("paymentTotal");
 const backToItemsButton = document.getElementById("backToItemsButton");
 const continuePaymentButton = document.getElementById("continuePaymentButton");
 const backToSummaryButton = document.getElementById("backToSummaryButton");
+const cashPaymentButton = document.getElementById("cashPaymentButton");
+const qrPaymentButton = document.getElementById("qrPaymentButton");
+const cardPaymentButton = document.getElementById("cardPaymentButton");
+const cashScreen = document.getElementById("cashScreen");
+const qrScreen = document.getElementById("qrScreen");
+const cardScreen = document.getElementById("cardScreen");
+const successScreen = document.getElementById("successScreen");
+const cashTotal = document.getElementById("cashTotal");
+const qrTotal = document.getElementById("qrTotal");
+const cardTotal = document.getElementById("cardTotal");
+const amountPaidInput = document.getElementById("amountPaidInput");
+const cashError = document.getElementById("cashError");
+const cashPayNowButton = document.getElementById("cashPayNowButton");
+const confirmQrPaymentButton = document.getElementById("confirmQrPaymentButton");
+const processCardPaymentButton = document.getElementById("processCardPaymentButton");
+const cardProcessingMessage = document.getElementById("cardProcessingMessage");
+const backToPaymentFromCashButton = document.getElementById("backToPaymentFromCashButton");
+const backToPaymentFromQrButton = document.getElementById("backToPaymentFromQrButton");
+const backToPaymentFromCardButton = document.getElementById("backToPaymentFromCardButton");
+const successTotal = document.getElementById("successTotal");
+const successAmountPaid = document.getElementById("successAmountPaid");
+const successMethod = document.getElementById("successMethod");
+const successChange = document.getElementById("successChange");
+const successReference = document.getElementById("successReference");
+const viewReceiptButton = document.getElementById("viewReceiptButton");
 
 function formatPeso(amount) {
     return "\u20B1" + amount.toFixed(2);
@@ -45,6 +70,10 @@ function showScreen(screenToShow) {
     itemSelectionScreen.classList.add("hidden");
     orderSummaryScreen.classList.add("hidden");
     paymentScreen.classList.add("hidden");
+    cashScreen.classList.add("hidden");
+    qrScreen.classList.add("hidden");
+    cardScreen.classList.add("hidden");
+    successScreen.classList.add("hidden");
 
     screenToShow.classList.remove("hidden");
     window.scrollTo(0, 0);
@@ -212,6 +241,81 @@ function goToPayment() {
     showScreen(paymentScreen);
 }
 
+function generateReferenceNumber() {
+    const randomNumber = Math.floor(100000 + Math.random() * 900000);
+    return "TXN-" + Date.now() + "-" + randomNumber;
+}
+
+// Shows the final success screen after any valid payment.
+function showPaymentSuccess(paymentMethod, amountPaid, changeAmount) {
+    const total = calculateTotal();
+
+    successTotal.textContent = formatPeso(total);
+    successAmountPaid.textContent = formatPeso(amountPaid);
+    successMethod.textContent = paymentMethod;
+    successChange.textContent = formatPeso(changeAmount);
+    successReference.textContent = generateReferenceNumber();
+
+    showScreen(successScreen);
+}
+
+function goToCashPayment() {
+    cashTotal.textContent = formatPeso(calculateTotal());
+    amountPaidInput.value = "";
+    cashError.textContent = "";
+    showScreen(cashScreen);
+}
+
+function processCashPayment() {
+    const total = calculateTotal();
+    const amountPaid = Number(amountPaidInput.value);
+
+    if (amountPaidInput.value === "" || isNaN(amountPaid)) {
+        cashError.textContent = "Please enter a valid amount paid.";
+        return;
+    }
+
+    if (amountPaid < 0) {
+        cashError.textContent = "Amount paid cannot be negative.";
+        return;
+    }
+
+    if (amountPaid < total) {
+        cashError.textContent = "Insufficient payment. Please enter at least " + formatPeso(total) + ".";
+        return;
+    }
+
+    showPaymentSuccess("Cash", amountPaid, amountPaid - total);
+}
+
+function goToQrPayment() {
+    qrTotal.textContent = formatPeso(calculateTotal());
+    showScreen(qrScreen);
+}
+
+function processQrPayment() {
+    const total = calculateTotal();
+    showPaymentSuccess("QR Payment", total, 0);
+}
+
+function goToCardPayment() {
+    cardTotal.textContent = formatPeso(calculateTotal());
+    cardProcessingMessage.textContent = "";
+    processCardPaymentButton.disabled = false;
+    showScreen(cardScreen);
+}
+
+function processCardPayment() {
+    const total = calculateTotal();
+
+    cardProcessingMessage.textContent = "Processing payment...";
+    processCardPaymentButton.disabled = true;
+
+    setTimeout(function() {
+        showPaymentSuccess("Credit/Debit Card", total, 0);
+    }, 1200);
+}
+
 summaryButton.addEventListener("click", goToOrderSummary);
 backToItemsButton.addEventListener("click", function() {
     showScreen(itemSelectionScreen);
@@ -220,6 +324,18 @@ continuePaymentButton.addEventListener("click", goToPayment);
 backToSummaryButton.addEventListener("click", function() {
     displayOrderSummary();
     showScreen(orderSummaryScreen);
+});
+cashPaymentButton.addEventListener("click", goToCashPayment);
+qrPaymentButton.addEventListener("click", goToQrPayment);
+cardPaymentButton.addEventListener("click", goToCardPayment);
+cashPayNowButton.addEventListener("click", processCashPayment);
+confirmQrPaymentButton.addEventListener("click", processQrPayment);
+processCardPaymentButton.addEventListener("click", processCardPayment);
+backToPaymentFromCashButton.addEventListener("click", goToPayment);
+backToPaymentFromQrButton.addEventListener("click", goToPayment);
+backToPaymentFromCardButton.addEventListener("click", goToPayment);
+viewReceiptButton.addEventListener("click", function() {
+    alert("Receipt screen is not implemented yet.");
 });
 
 displayProducts();
