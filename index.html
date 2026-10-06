@@ -37,6 +37,7 @@
                         <strong id="transactionTotal">&#8369;0.00</strong>
                     </div>
 
+                    <p id="cartError" class="error-message"></p>
                     <button id="summaryButton" class="summary-button">Proceed to Order Summary</button>
                 </aside>
             </div>
@@ -80,21 +81,118 @@
                 </div>
 
                 <div class="payment-methods">
-                    <button class="payment-button cash-button" type="button">
+                    <button id="cashPaymentButton" class="payment-button cash-button" type="button">
                         <span class="payment-icon">&#128181;</span>
                         Cash
                     </button>
-                    <button class="payment-button qr-button" type="button">
+                    <button id="qrPaymentButton" class="payment-button qr-button" type="button">
                         <span class="payment-icon">&#9638;</span>
                         QR Payment
                     </button>
-                    <button class="payment-button card-button" type="button">
+                    <button id="cardPaymentButton" class="payment-button card-button" type="button">
                         <span class="payment-icon">&#128179;</span>
                         Credit/Debit Card
                     </button>
                 </div>
 
                 <button id="backToSummaryButton" class="back-button">Back</button>
+            </div>
+        </section>
+
+        <section id="cashScreen" class="screen payment-detail-screen hidden">
+            <header class="top-bar">
+                <div>
+                    <p class="eyebrow">Cash Payment</p>
+                    <h1>Enter Amount Paid</h1>
+                </div>
+            </header>
+
+            <div class="payment-panel">
+                <div class="payment-total">
+                    <span>Total Amount</span>
+                    <strong id="cashTotal">&#8369;0.00</strong>
+                </div>
+
+                <label class="input-label" for="amountPaidInput">Amount Paid</label>
+                <input id="amountPaidInput" class="amount-input" type="number" min="0" step="0.01" inputmode="decimal" placeholder="0.00">
+                <p id="cashError" class="error-message"></p>
+
+                <div class="summary-actions">
+                    <button id="backToPaymentFromCashButton" class="back-button">Back</button>
+                    <button id="cashPayNowButton" class="summary-button">Pay Now</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="qrScreen" class="screen payment-detail-screen hidden">
+            <header class="top-bar">
+                <div>
+                    <p class="eyebrow">QR Payment</p>
+                    <h1>Scan to Pay</h1>
+                </div>
+            </header>
+
+            <div class="payment-panel">
+                <div class="payment-total">
+                    <span>Amount Due</span>
+                    <strong id="qrTotal">&#8369;0.00</strong>
+                </div>
+
+                <div class="qr-placeholder" aria-label="QR payment placeholder">
+                    <span>QR</span>
+                </div>
+                <p class="payment-instruction">Scan this QR code using your mobile payment app, then tap Confirm Payment.</p>
+
+                <div class="summary-actions">
+                    <button id="backToPaymentFromQrButton" class="back-button">Back</button>
+                    <button id="confirmQrPaymentButton" class="summary-button">Confirm Payment</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="cardScreen" class="screen payment-detail-screen hidden">
+            <header class="top-bar">
+                <div>
+                    <p class="eyebrow">Card Payment</p>
+                    <h1>Pay by Card</h1>
+                </div>
+            </header>
+
+            <div class="payment-panel">
+                <div class="payment-total">
+                    <span>Amount Due</span>
+                    <strong id="cardTotal">&#8369;0.00</strong>
+                </div>
+
+                <p class="payment-instruction">Please tap, insert, or swipe your card.</p>
+                <p id="cardProcessingMessage" class="processing-message"></p>
+
+                <div class="summary-actions">
+                    <button id="backToPaymentFromCardButton" class="back-button">Back</button>
+                    <button id="processCardPaymentButton" class="summary-button">Process Payment</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="successScreen" class="screen success-screen hidden">
+            <header class="top-bar">
+                <div>
+                    <p class="eyebrow">Payment Successful</p>
+                    <h1>Transaction Complete</h1>
+                </div>
+            </header>
+
+            <div class="success-panel">
+                <div class="success-check">&#10003;</div>
+                <div class="success-details">
+                    <p><span>Total Transaction Amount</span><strong id="successTotal">&#8369;0.00</strong></p>
+                    <p><span>Amount Paid</span><strong id="successAmountPaid">&#8369;0.00</strong></p>
+                    <p><span>Payment Method</span><strong id="successMethod">Cash</strong></p>
+                    <p><span>Change</span><strong id="successChange">&#8369;0.00</strong></p>
+                    <p><span>Reference Number</span><strong id="successReference">TXN-000000</strong></p>
+                </div>
+
+                <button id="viewReceiptButton" class="summary-button">View Receipt</button>
             </div>
         </section>
     </main>
