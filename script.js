@@ -10,6 +10,7 @@ const products = [
 
 // The cart starts empty. Items are added here when products are tapped.
 let cart = [];
+let completedTransaction = null;
 
 const productGrid = document.getElementById("productGrid");
 const cartItems = document.getElementById("cartItems");
@@ -51,6 +52,15 @@ const successMethod = document.getElementById("successMethod");
 const successChange = document.getElementById("successChange");
 const successReference = document.getElementById("successReference");
 const viewReceiptButton = document.getElementById("viewReceiptButton");
+const receiptScreen = document.getElementById("receiptScreen");
+const receiptReference = document.getElementById("receiptReference");
+const receiptDate = document.getElementById("receiptDate");
+const receiptMethod = document.getElementById("receiptMethod");
+const receiptItems = document.getElementById("receiptItems");
+const receiptTotal = document.getElementById("receiptTotal");
+const receiptAmountPaid = document.getElementById("receiptAmountPaid");
+const receiptChange = document.getElementById("receiptChange");
+const newTransactionButton = document.getElementById("newTransactionButton");
 
 function formatPeso(amount) {
     return "\u20B1" + amount.toFixed(2);
@@ -75,6 +85,7 @@ function showScreen(screenToShow) {
     qrScreen.classList.add("hidden");
     cardScreen.classList.add("hidden");
     successScreen.classList.add("hidden");
+    receiptScreen.classList.add("hidden");
 
     screenToShow.classList.remove("hidden");
     window.scrollTo(0, 0);
@@ -260,17 +271,100 @@ function generateReferenceNumber() {
     return "TXN-" + Date.now() + "-" + randomNumber;
 }
 
+function formatReceiptDate(dateValue) {
+    return dateValue.toLocaleString("en-PH", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "numeric",
+        minute: "2-digit"
+    });
+}
+
 // Shows the final success screen after any valid payment.
 function showPaymentSuccess(paymentMethod, amountPaid, changeAmount) {
     const total = calculateTotal();
+    const referenceNumber = generateReferenceNumber();
+
+    completedTransaction = {
+        referenceNumber: referenceNumber,
+        date: new Date(),
+        items: cart.map(function(item) {
+            return {
+                name: item.name,
+                price: item.price,
+                quantity: item.quantity,
+                subtotal: item.price * item.quantity
+            };
+        }),
+        total: total,
+        paymentMethod: paymentMethod,
+        amountPaid: amountPaid,
+        change: changeAmount
+    };
 
     successTotal.textContent = formatPeso(total);
     successAmountPaid.textContent = formatPeso(amountPaid);
     successMethod.textContent = paymentMethod;
     successChange.textContent = formatPeso(changeAmount);
-    successReference.textContent = generateReferenceNumber();
+    successReference.textContent = referenceNumber;
 
     showScreen(successScreen);
+}
+
+function displayReceipt() {
+    if (!completedTransaction) {
+        return;
+    }
+
+    receiptReference.textContent = completedTransaction.referenceNumber;
+    receiptDate.textContent = formatReceiptDate(completedTransaction.date);
+    receiptMethod.textContent = completedTransaction.paymentMethod;
+    receiptTotal.textContent = formatPeso(completedTransaction.total);
+    receiptAmountPaid.textContent = formatPeso(completedTransaction.amountPaid);
+    receiptChange.textContent = formatPeso(completedTransaction.change);
+    receiptItems.innerHTML = "";
+
+    completedTransaction.items.forEach(function(item) {
+        const receiptItem = document.createElement("div");
+        receiptItem.className = "receipt-item";
+        receiptItem.innerHTML = `
+            <span class="receipt-item-name">${item.name}</span>
+            <span>Qty: ${item.quantity}</span>
+            <span>${formatPeso(item.price)}</span>
+            <strong>${formatPeso(item.subtotal)}</strong>
+        `;
+
+        receiptItems.appendChild(receiptItem);
+    });
+
+    showScreen(receiptScreen);
+}
+
+function startNewTransaction() {
+    cart = [];
+    completedTransaction = null;
+
+    amountPaidInput.value = "";
+    cashError.textContent = "";
+    cartError.textContent = "";
+    cardProcessingMessage.textContent = "";
+    processCardPaymentButton.disabled = false;
+    receiptItems.innerHTML = "";
+
+    paymentTotal.textContent = formatPeso(0);
+    cashTotal.textContent = formatPeso(0);
+    qrTotal.textContent = formatPeso(0);
+    cardTotal.textContent = formatPeso(0);
+    summaryTotal.textContent = formatPeso(0);
+    successTotal.textContent = formatPeso(0);
+    successAmountPaid.textContent = formatPeso(0);
+    successMethod.textContent = "";
+    successChange.textContent = formatPeso(0);
+    successReference.textContent = "";
+
+    displayCart();
+    showScreen(itemSelectionScreen);
 }
 
 function goToCashPayment() {
@@ -348,9 +442,8 @@ processCardPaymentButton.addEventListener("click", processCardPayment);
 backToPaymentFromCashButton.addEventListener("click", goToPayment);
 backToPaymentFromQrButton.addEventListener("click", goToPayment);
 backToPaymentFromCardButton.addEventListener("click", goToPayment);
-viewReceiptButton.addEventListener("click", function() {
-    alert("Receipt screen is not implemented yet.");
-});
+viewReceiptButton.addEventListener("click", displayReceipt);
+newTransactionButton.addEventListener("click", startNewTransaction);
 
 displayProducts();
 displayCart();

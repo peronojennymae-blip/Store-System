@@ -195,6 +195,38 @@
                 <button id="viewReceiptButton" class="summary-button">View Receipt</button>
             </div>
         </section>
+
+        <section id="receiptScreen" class="screen receipt-screen hidden">
+            <header class="top-bar">
+                <div>
+                    <p class="eyebrow">Digital Receipt</p>
+                    <h1>Receipt</h1>
+                </div>
+            </header>
+
+            <div class="receipt-panel">
+                <div class="receipt-header">
+                    <h2>Campus Store POS</h2>
+                    <p>Status: <strong>Payment Successful</strong></p>
+                </div>
+
+                <div class="receipt-info">
+                    <p><span>Reference Number</span><strong id="receiptReference">TXN-000000</strong></p>
+                    <p><span>Date</span><strong id="receiptDate">--</strong></p>
+                    <p><span>Payment Method</span><strong id="receiptMethod">--</strong></p>
+                </div>
+
+                <div id="receiptItems" class="receipt-items"></div>
+
+                <div class="receipt-totals">
+                    <p><span>Total Amount</span><strong id="receiptTotal">&#8369;0.00</strong></p>
+                    <p><span>Amount Paid</span><strong id="receiptAmountPaid">&#8369;0.00</strong></p>
+                    <p><span>Change</span><strong id="receiptChange">&#8369;0.00</strong></p>
+                </div>
+
+                <button id="newTransactionButton" class="summary-button">New Transaction</button>
+            </div>
+        </section>
     </main>
 
     <script src="script.js"></script>
