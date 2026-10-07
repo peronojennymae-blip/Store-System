@@ -47,7 +47,6 @@ const products = [
 // The cart starts empty. Items are added here when products are tapped.
 let cart = [];
 let completedTransaction = null;
-let isProcessingPayment = false;
 
 const productGrid = document.getElementById("productGrid");
 const cartItems = document.getElementById("cartItems");
@@ -339,6 +338,23 @@ function createTransactionItems() {
     });
 }
 
+function describeSupabaseError(error) {
+    if (!error) {
+        return "Unknown Supabase error.";
+    }
+
+    if (typeof error === "string") {
+        return error;
+    }
+
+    return [
+        error.message,
+        error.details,
+        error.hint,
+        error.code ? "Code: " + error.code : ""
+    ].filter(Boolean).join(" | ") || JSON.stringify(error);
+}
+
 async function saveTransactionToSupabase(transactionNumber, total, paymentMethod, amountPaid, changeAmount, items) {
     if (!db) {
         throw new Error("Supabase is not initialized.");
@@ -393,71 +409,50 @@ async function saveTransactionToSupabase(transactionNumber, total, paymentMethod
     return transaction;
 }
 
-// Saves a completed payment before showing the existing success screen.
-async function showPaymentSuccess(paymentMethod, amountPaid, changeAmount) {
-    if (isProcessingPayment) {
-        return;
-    }
-
+// Shows the existing success screen and saves the transaction without blocking the receipt.
+function showPaymentSuccess(paymentMethod, amountPaid, changeAmount) {
     if (cart.length === 0) {
         console.error("Cannot save a payment with an empty cart.");
         return;
     }
-
-    isProcessingPayment = true;
-    cashPayNowButton.disabled = true;
-    confirmQrPaymentButton.disabled = true;
-    processCardPaymentButton.disabled = true;
 
     const total = calculateTotal();
     const referenceNumber = generateReferenceNumber();
     const transactionDate = new Date();
     const items = createTransactionItems();
 
-    try {
-        const savedTransaction = await saveTransactionToSupabase(
-            referenceNumber,
-            total,
-            paymentMethod,
-            amountPaid,
-            changeAmount,
-            items
-        );
+    completedTransaction = {
+        referenceNumber: referenceNumber,
+        date: transactionDate,
+        items: items,
+        total: total,
+        paymentMethod: paymentMethod,
+        amountPaid: amountPaid,
+        change: changeAmount
+    };
 
-        completedTransaction = {
-            databaseId: savedTransaction.id,
-            referenceNumber: referenceNumber,
-            date: transactionDate,
-            items: items,
-            total: total,
-            paymentMethod: paymentMethod,
-            amountPaid: amountPaid,
-            change: changeAmount
-        };
+    displayTotal(successTotal, total);
+    displayTotal(successAmountPaid, amountPaid);
+    successMethod.textContent = paymentMethod;
+    displayTotal(successChange, changeAmount);
+    successReference.textContent = referenceNumber;
+    cardProcessingMessage.textContent = "";
+    showScreen(successScreen);
 
-        displayTotal(successTotal, total);
-        displayTotal(successAmountPaid, amountPaid);
-        successMethod.textContent = paymentMethod;
-        displayTotal(successChange, changeAmount);
-        successReference.textContent = referenceNumber;
-        cardProcessingMessage.textContent = "";
-
-        showScreen(successScreen);
-    } catch (error) {
-        console.error("Payment could not be fully saved to Supabase:", error);
-        const errorMessage = "Payment could not be recorded. Check the browser console for details.";
-
-        if (paymentMethod === "Cash") {
-            cashError.textContent = errorMessage;
-        } else if (paymentMethod === "Credit/Debit Card") {
-            cardProcessingMessage.textContent = errorMessage;
-        }
-    } finally {
-        isProcessingPayment = false;
-        cashPayNowButton.disabled = false;
-        confirmQrPaymentButton.disabled = false;
-        processCardPaymentButton.disabled = false;
-    }
+    saveTransactionToSupabase(
+        referenceNumber,
+        total,
+        paymentMethod,
+        amountPaid,
+        changeAmount,
+        items
+    ).catch(function(error) {
+        const errorDetails = describeSupabaseError(error);
+        console.error("Payment could not be fully saved to Supabase:", {
+            message: errorDetails,
+            error: error
+        });
+    });
 }
 
 function displayReceipt() {
@@ -522,7 +517,7 @@ function goToCashPayment() {
     showScreen(cashScreen);
 }
 
-async function processCashPayment() {
+function processCashPayment() {
     const total = calculateTotal();
     const amountPaid = Number(amountPaidInput.value);
 
@@ -541,7 +536,7 @@ async function processCashPayment() {
         return;
     }
 
-    await showPaymentSuccess("Cash", amountPaid, amountPaid - total);
+    showPaymentSuccess("Cash", amountPaid, amountPaid - total);
 }
 
 function goToQrPayment() {
@@ -549,9 +544,9 @@ function goToQrPayment() {
     showScreen(qrScreen);
 }
 
-async function processQrPayment() {
+function processQrPayment() {
     const total = calculateTotal();
-    await showPaymentSuccess("QR Payment", total, 0);
+    showPaymentSuccess("QR Payment", total, 0);
 }
 
 function goToCardPayment() {
